@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Zadania from './Zadania.jsx';
 import './styl.css';
+import Filtry from './Filtry.jsx';
+import Sortowanie from './Sortowanie.jsx';
 
 export default function Lista() {
   const [noweZadanie, ustawNoweZadanie] = useState('');
@@ -8,7 +10,7 @@ export default function Lista() {
   const [edytowanaTresc, ustawEdytowanąTresc] = useState('');
   const [priority, setPriority] = useState('normal');
   
-  const { zadania, dodajZadanie, usuńZadanie, edytujZadanie, toggleZadanie, wyczyśćWszystko } = Zadania();
+  const { zadania, dodajZadanie, usuńZadanie, edytujZadanie, toggleZadanie, wyczyśćWszystko, filtr, ustawFiltr, sortowanie, ustawSortowanie } = Zadania();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -60,6 +62,11 @@ export default function Lista() {
           </button>
         </form>
 
+
+        <div className="kontrole">
+        <Filtry aktualnyFiltr={filtr} ustawFiltr={ustawFiltr} />
+        <Sortowanie sortowanie={sortowanie} ustawSortowanie={ustawSortowanie} />
+        </div>
         <button onClick={wyczyśćWszystko} aria-label="Wyczyść wszystkie zadania">
           Wyczyść wszystko
         </button>

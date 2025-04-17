@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function Zadania() {
   const [zadania, ustawZadania] = useState(() => {
     const zapisane = localStorage.getItem('zadanie');
     return zapisane ? JSON.parse(zapisane) : [];
   });
+  
+
+  const [filtr, ustawFiltr] = useState('wszystkie');
+  const [sortowanie, ustawSortowanie] = useState('data');
+
 
   useEffect(() => {
     localStorage.setItem('zadanie', JSON.stringify(zadania));
   }, [zadania]);
+
 
   const dodajZadanie = (text, priority = 'normal') => {
     ustawZadania([...zadania, {
@@ -20,9 +26,11 @@ export default function Zadania() {
     }]);
   };
 
+
   const usuńZadanie = (id) => {
     ustawZadania(zadania.filter(zadanie => zadanie.id !== id));
   };
+
 
   const edytujZadanie = (id, nowyText, nowyPriority) => {
     ustawZadania(zadania.map(zadanie => 
@@ -34,15 +42,53 @@ export default function Zadania() {
     ));
   };
 
+
   const toggleZadanie = (id) => {
     ustawZadania(zadania.map(zadanie =>
       zadanie.id === id ? { ...zadanie, completed: !zadanie.completed } : zadanie
     ));
   };
 
+
+  const przefiltrowaneIPosortowaneZadania = useMemo(() => {
+    const przefiltrowane = zadania.filter(zadanie => {
+      if (filtr === 'ukonczone') return zadanie.completed;
+      if (filtr === 'aktywne') return !zadanie.completed;
+      return true;
+    });
+
+
+    return [...przefiltrowane].sort((a, b) => {
+      switch(sortowanie) {
+        case 'priorytet':
+          const kolejnośćPriorytetów = { high: 3, normal: 2, low: 1 };
+          return kolejnośćPriorytetów[b.priority] - kolejnośćPriorytetów[a.priority];
+        
+        case 'nazwa':
+          return a.text.localeCompare(b.text);
+          
+        default: // 'data'
+          return new Date(b.date) - new Date(a.date);
+      }
+    });
+  }, [zadania, filtr, sortowanie]);
+
+
   const wyczyśćWszystko = () => {
     ustawZadania([]);
   };
 
-  return { zadania, dodajZadanie, usuńZadanie, edytujZadanie, toggleZadanie, wyczyśćWszystko };
+
+  return { 
+    zadania: przefiltrowaneIPosortowaneZadania,
+    dodajZadanie, 
+    usuńZadanie, 
+    edytujZadanie, 
+    toggleZadanie, 
+    wyczyśćWszystko,
+    filtr,
+    ustawFiltr,
+    sortowanie,
+    ustawSortowanie
+  };
 }
