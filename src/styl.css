@@ -146,18 +146,6 @@
     cursor: pointer;
   }
 
-  .priority-high {
-    border-left: 4px solid #ff6b6b;
-  }
-  
-  .priority-normal {
-    border-left: 4px solid #4dabf7;
-  }
-  
-  .priority-low {
-    border-left: 4px solid #51cf66;
-  }
-  
   .task-meta {
     display: flex;
     gap: 12px;
@@ -187,6 +175,19 @@
       align-self: flex-end;
     }
   }
+
+  .priority-high {
+    border-left: 4px solid #ff6b6b;
+  }
+  
+  .priority-normal {
+    border-left: 4px solid #4dabf7;
+  }
+  
+  .priority-low {
+    border-left: 4px solid #51cf66;
+  }
+  
 
   .filtry-container {
     margin: 20px 0;
