@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Zadania from './Zadania.jsx';
 import './styl.css';
-import Filtry from './filtry.jsx';
-import Sortowanie from './sortowanie.jsx';
+import Filtry from './Filtry.jsx';
+import Sortowanie from './Sortowanie.jsx';
 import DOMPurify from 'dompurify';
 
 export default function Lista() {
