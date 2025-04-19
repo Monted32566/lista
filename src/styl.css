@@ -1,4 +1,8 @@
-  body {
+*:focus-visible {
+  outline: 3px solid #4dabf7;
+  outline-offset: 2px;
+}
+body {
     background-color: #f8f9fa;
     margin: 0;
     padding: 20px;
