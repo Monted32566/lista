@@ -128,7 +128,7 @@ export default function Lista() {
           {zadania.map((item) => (
             <li 
               key={item.id} 
-              className={`task-item ${item.completed ? 'completed' : ''}`}
+              className={`task-item ${item.completed ? 'completed' : ''} priority-${item.priority}`}
               role="listitem"
               aria-current={edytowaneId === item.id ? "true" : undefined}
             >
@@ -177,11 +177,6 @@ export default function Lista() {
                     </span>
                     <div className="task-meta">
                       <span className="task-date">{formatDate(item.date)}</span>
-                      <span className={`task-priority priority-${item.priority}`}>
-                        {item.priority === 'high' && 'Wysoki priorytet'}
-                        {item.priority === 'low' && 'Niski priorytet'}
-                        {item.priority === 'normal' && 'Normalny priorytet'}
-                      </span>
                     </div>
                   </div>
                 )}
