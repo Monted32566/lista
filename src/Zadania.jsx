@@ -1,29 +1,47 @@
 import { useState, useEffect, useMemo } from 'react';
+import DOMPurify from 'dompurify';
+
+const sanitizeTask = (task) => ({
+  ...task,
+  text: DOMPurify.sanitize(task.text),
+  priority: ['low', 'normal', 'high'].includes(task.priority) 
+    ? task.priority 
+    : 'normal'
+});
 
 export default function Zadania() {
   const [zadania, ustawZadania] = useState(() => {
-    const zapisane = localStorage.getItem('zadanie');
-    return zapisane ? JSON.parse(zapisane) : [];
+    try {
+      const zapisane = localStorage.getItem('zadanie');
+      return zapisane 
+        ? JSON.parse(zapisane).map(sanitizeTask) 
+        : [];
+    } catch {
+      return [];
+    }
   });
-  
 
   const [filtr, ustawFiltr] = useState('wszystkie');
   const [sortowanie, ustawSortowanie] = useState('data');
-
 
   useEffect(() => {
     localStorage.setItem('zadanie', JSON.stringify(zadania));
   }, [zadania]);
 
-
   const dodajZadanie = (text, priority = 'normal') => {
-    ustawZadania([...zadania, {
-      id: Date.now(),
-      text,
-      completed: false,
-      date: new Date(),
-      priority: priority
-    }]);
+    const cleanText = DOMPurify.sanitize(text);
+    ustawZadania(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        text: cleanText,
+        completed: false,
+        date: new Date().toISOString(),
+        priority: ['low', 'normal', 'high'].includes(priority) 
+          ? priority 
+          : 'normal'
+      }
+    ]);
   };
 
 
@@ -56,39 +74,31 @@ export default function Zadania() {
       if (filtr === 'aktywne') return !zadanie.completed;
       return true;
     });
-
-
+  
     return [...przefiltrowane].sort((a, b) => {
       switch(sortowanie) {
-        case 'priorytet':
-          const kolejnośćPriorytetów = { high: 3, normal: 2, low: 1 };
-          return kolejnośćPriorytetów[b.priority] - kolejnośćPriorytetów[a.priority];
-        
-        case 'nazwa':
-          return a.text.localeCompare(b.text);
-          
-        default: // 'data'
-          return new Date(b.date) - new Date(a.date);
+        case 'priorytet': 
+          return { high: 3, normal: 2, low: 1 }[b.priority] - { high: 3, normal: 2, low: 1 }[a.priority];
+        case 'nazwa': return a.text.localeCompare(b.text);
+        default: return new Date(b.date) - new Date(a.date);
       }
     });
   }, [zadania, filtr, sortowanie]);
 
-
   const wyczyśćWszystko = () => {
     ustawZadania([]);
   };
-
-
+  
   return { 
     zadania: przefiltrowaneIPosortowaneZadania,
     dodajZadanie, 
     usuńZadanie, 
     edytujZadanie, 
     toggleZadanie, 
-    wyczyśćWszystko,
     filtr,
     ustawFiltr,
     sortowanie,
-    ustawSortowanie
+    ustawSortowanie,
+    wyczyśćWszystko
   };
 }

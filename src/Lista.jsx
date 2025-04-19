@@ -1,60 +1,101 @@
-import React, { useState } from 'react';
-import Zadania from './Zadania.jsx';
+import React, { useState, useEffect } from 'react';
+import Zadania from './Zadania';
 import './styl.css';
-import Filtry from './Filtry.jsx';
-import Sortowanie from './Sortowanie.jsx';
+import Filtry from './filtry';
+import Sortowanie from './sortowanie';
+import DOMPurify from 'dompurify';
 
 export default function Lista() {
   const [noweZadanie, ustawNoweZadanie] = useState('');
   const [edytowaneId, ustawEdytowaneId] = useState(null);
   const [edytowanaTresc, ustawEdytowanąTresc] = useState('');
   const [priority, setPriority] = useState('normal');
+  const [notification, setNotification] = useState('');
   
-  const { zadania, dodajZadanie, usuńZadanie, edytujZadanie, toggleZadanie, wyczyśćWszystko, filtr, ustawFiltr, sortowanie, ustawSortowanie } = Zadania();
+  const { 
+    zadania, 
+    dodajZadanie, 
+    usuńZadanie, 
+    edytujZadanie, 
+    toggleZadanie, 
+    wyczyśćWszystko, 
+    filtr, 
+    ustawFiltr, 
+    sortowanie, 
+    ustawSortowanie 
+  } = Zadania();
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (noweZadanie.trim() === '') return;
-    dodajZadanie(noweZadanie, priority);
+    if (!noweZadanie.trim()) return;
+    
+    const cleanText = DOMPurify.sanitize(noweZadanie);
+    dodajZadanie(cleanText, priority);
     ustawNoweZadanie('');
     setPriority('normal');
+    setNotification(`Dodano zadanie: ${cleanText}`);
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  };
-
-  const getPriorityColor = (priority) => {
-    switch(priority) {
-      case 'high': return 'priority-high';
-      case 'low': return 'priority-low';
-      default: return 'priority-normal';
-    }
+    const options = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('pl-PL', options);
   };
 
   return (
     <div className="container">
+      <div 
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {notification}
+      </div>
+
       <div className="top-panel">
-        <h1> Lista Zadań </h1>
+        <h1 id="main-heading">Lista Zadań</h1>
         
-        <form onSubmit={handleSubmit} className="form">
+        <form 
+          onSubmit={handleSubmit} 
+          className="form"
+          aria-labelledby="main-heading"
+        >
+          <label htmlFor="new-task-input" className="sr-only">
+            Wpisz treść nowego zadania
+          </label>
           <input
+            id="new-task-input"
             type="text"
             value={noweZadanie}
             onChange={(e) => ustawNoweZadanie(e.target.value)}
             placeholder="Dodaj nowe zadanie..."
-            aria-label="Wpisz treść zadania"
+            aria-required="true"
           />
           
+          <label htmlFor="priority-select" className="sr-only">
+            Wybierz priorytet
+          </label>
           <select 
+            id="priority-select"
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
             className="priority-select"
           >
-            <option value="low"> Niski</option>
-            <option value="normal"> Normalny</option>
-            <option value="high"> Wysoki</option>
+            <option value="low">Niski</option>
+            <option value="normal">Normalny</option>
+            <option value="high">Wysoki</option>
           </select>
           
           <button type="submit" aria-label="Dodaj zadanie">
@@ -62,48 +103,65 @@ export default function Lista() {
           </button>
         </form>
 
-
         <div className="kontrole">
-        <Filtry aktualnyFiltr={filtr} ustawFiltr={ustawFiltr} />
-        <Sortowanie sortowanie={sortowanie} ustawSortowanie={ustawSortowanie} />
+          <Filtry aktualnyFiltr={filtr} ustawFiltr={ustawFiltr} />
+          <Sortowanie sortowanie={sortowanie} ustawSortowanie={ustawSortowanie} />
         </div>
-        <button onClick={wyczyśćWszystko} aria-label="Wyczyść wszystkie zadania">
+        
+        <button 
+          onClick={() => {
+            wyczyśćWszystko();
+            setNotification('Wyczyszczono wszystkie zadania');
+          }}
+          aria-label="Wyczyść wszystkie zadania"
+        >
           Wyczyść wszystko
         </button>
       </div>
 
       <div className="bottom-panel">
-        <ul className="task-list">
+        <ul 
+          className="task-list"
+          role="list"
+          aria-label="Lista zadań"
+        >
           {zadania.map((item) => (
-            <li key={item.id} className={`task-item ${item.completed ? 'completed' : ''} ${getPriorityColor(item.priority)}`}>
+            <li 
+              key={item.id} 
+              className={`task-item ${item.completed ? 'completed' : ''}`}
+              role="listitem"
+              aria-current={edytowaneId === item.id ? "true" : undefined}
+            >
               <div className="task-content">
                 <input
                   type="checkbox"
+                  id={`task-${item.id}-checkbox`}
                   checked={item.completed}
-                  onChange={() => toggleZadanie(item.id)}
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label={item.completed ? 'Oznacz jako nieukończone' : 'Oznacz jako ukończone'}
-                  className="task-checkbox"
+                  onChange={() => {
+                    toggleZadanie(item.id);
+                    setNotification(
+                      `Zadanie "${item.text}" oznaczone jako ${item.completed ? 'nieukończone' : 'ukończone'}`
+                    );
+                  }}
+                  aria-labelledby={`task-${item.id}-label`}
                 />
+                
                 {edytowaneId === item.id ? (
                   <div className="edit-form">
+                    <label htmlFor={`edit-${item.id}`} className="sr-only">
+                      Edytuj zadanie
+                    </label>
                     <input
+                      id={`edit-${item.id}`}
                       value={edytowanaTresc}
                       onChange={(e) => ustawEdytowanąTresc(e.target.value)}
-                      aria-label="Edytuj zadanie"
                     />
-                    <select
-                      value={item.priority}
-                      onChange={(e) => edytujZadanie(item.id, edytowanaTresc, e.target.value)}
-                    >
-                      <option value="low">Niski</option>
-                      <option value="normal">Normalny</option>
-                      <option value="high">Wysoki</option>
-                    </select>
                     <button
                       onClick={() => {
-                        edytujZadanie(item.id, edytowanaTresc, item.priority);
+                        const cleanText = DOMPurify.sanitize(edytowanaTresc);
+                        edytujZadanie(item.id, cleanText, item.priority);
                         ustawEdytowaneId(null);
+                        setNotification(`Zaktualizowano zadanie: ${cleanText}`);
                       }}
                     >
                       Zapisz
@@ -111,18 +169,24 @@ export default function Lista() {
                   </div>
                 ) : (
                   <div className="task-details">
-                    <span className={item.completed ? 'completed-text' : ''}>{item.text}</span>
+                    <span 
+                      id={`task-${item.id}-label`}
+                      className={item.completed ? 'completed-text' : ''}
+                    >
+                      {item.text}
+                    </span>
                     <div className="task-meta">
                       <span className="task-date">{formatDate(item.date)}</span>
-                      <span className={`task-priority ${getPriorityColor(item.priority)}`}>
-                        {item.priority === 'high'}
-                        {item.priority === 'low'}
-                        {item.priority === 'normal'}
+                      <span className={`task-priority priority-${item.priority}`}>
+                        {item.priority === 'high' && 'Wysoki priorytet'}
+                        {item.priority === 'low' && 'Niski priorytet'}
+                        {item.priority === 'normal' && 'Normalny priorytet'}
                       </span>
                     </div>
                   </div>
                 )}
               </div>
+              
               <div className="task-actions">
                 <button
                   onClick={() => {
@@ -134,7 +198,10 @@ export default function Lista() {
                   Edytuj
                 </button>
                 <button
-                  onClick={() => usuńZadanie(item.id)}
+                  onClick={() => {
+                    usuńZadanie(item.id);
+                    setNotification(`Usunięto zadanie: ${item.text}`);
+                  }}
                   aria-label={`Usuń zadanie: ${item.text}`}
                 >
                   Usuń
