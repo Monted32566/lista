@@ -206,6 +206,7 @@ body {
   #button-class-filtr{
     display: flex;
     gap: 10px;
+    overflow: auto;
   }
   
   
