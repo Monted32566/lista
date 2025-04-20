@@ -4,13 +4,13 @@ import './styl.css';
 export default function Filtry({ aktualnyFiltr, ustawFiltr }) {
   return (
     <fieldset className="filtry-container">
-      <legend className="visually-hidden">Filtruj zadania</legend>
       <div 
         role="group" 
         aria-labelledby="filter-group-label"
         className="przyciski-filtrow"
       >
         <h3 id="filter-group-label">Filtruj zadania:</h3>
+        <div id="button-class-filtr">
         <button
           onClick={() => ustawFiltr('wszystkie')}
           className={aktualnyFiltr === 'wszystkie' ? 'aktywny' : ''}
@@ -32,6 +32,7 @@ export default function Filtry({ aktualnyFiltr, ustawFiltr }) {
         >
           Ukończone
         </button>
+        </div>
       </div>
     </fieldset>
   );
