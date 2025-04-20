@@ -196,6 +196,8 @@ body {
     padding: 15px;
     background: #f8f9fa;
     border-radius: 8px;
+    border: solid 0.5px  #495057;
+    overflow: auto;
   }
   
   .filtry-container h3 {
@@ -206,7 +208,6 @@ body {
   #button-class-filtr{
     display: flex;
     gap: 10px;
-    overflow: auto;
   }
   
   
@@ -239,6 +240,8 @@ body {
   padding: 15px;
   background: #f8f9fa;
   border-radius: 8px;
+  width: 50%;
+  border: solid 0.5px  #495057;
 }
 
 .sortowanie-container h3 {
