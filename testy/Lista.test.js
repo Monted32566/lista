@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Lista from './Lista';
+import Lista from '../src/Lista';
 
 test('renders Lista component', () => {
   render(<Lista />);
