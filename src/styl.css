@@ -197,7 +197,6 @@ body {
     background: #f8f9fa;
     border-radius: 8px;
     border: solid 0.5px  #495057;
-    overflow: auto;
   }
   
   .filtry-container h3 {
@@ -271,7 +270,11 @@ select:focus {
   align-items: flex-start;
 }
 
-@media (max-width: 480px) {
+
+@media (max-width: 768px) {
+  .kontrole {
+    flex-direction: column;
+  }
   .form {
     flex-direction: column;
   }
@@ -283,10 +286,9 @@ select:focus {
     margin-top: 10px;
     align-self: flex-end;
   }
-}
-
-@media (max-width: 768px) {
-  .kontrole {
+  #button-class-filtr {
+    display: flex;
     flex-direction: column;
+    gap: 10px;
   }
 }
